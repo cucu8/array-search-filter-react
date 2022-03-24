@@ -1,0 +1,27 @@
+.cart-component {
+    background-color: grey;
+    border: 1px solid black;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    height: 100px;
+    text-align: center;
+}
+
+.product-name {
+    color:#fff
+}
+
+.product-price {
+    color:#fff
+}
+
+.add-button {
+    border-radius: 5px;
+    margin: 10px;
+}
+
+.add-button:hover {
+    background-color: grey;
+    color: #fff;
+}
+

@@ -1,51 +1,61 @@
-//! useMemo  hooku componenti bir kere render eder ve aklında tutar. o componentte bir state değişimi olsa bile tüm sayfayı tekrardan render etmez.
-//! genelde api istegi cok olan componentlerde ve form control componentlerde kullanılabilir.
-import { useEffect, useMemo, useState } from "react"
-import axios from "axios";
+import React, { useCallback, useEffect, useState } from 'react';
+import axios from 'axios';
 import "./App.css";
+import { Cart, ShoppingCart } from './components';
+import { Row, Col } from 'react-bootstrap';
+
 
 const App = () => {
-  const [users, setUsers] = useState([]);
-  const [searchText, setSearchText] = useState("");
-
-  const fetchUsers = () => {
-    axios.get("https://6238bcf800ed1dbc5ab6d6a7.mockapi.io/users")
-      .then(response => setUsers(response.data))
-      .catch(err => console.log(err.message));
-  }
-
-  const handleSubmitSearchText = (e) => {
-    e.preventDefault();
-    setSearchText(e.target.value);
-  }
-
-  //! use memo kullanmazsak her inputa giriş yaptıgımızda, ka. tane user var ise o kadar render işlemi yapacak. 
-  //!sadece çok büyük datalarda yazılması fayfalı olur.
-  // const filteredUsers = users.filter(user => {
-  //   console.log("filter function runnig...")
-  //   return user.name.toLowerCase().includes(searchText.toLowerCase());
-  // })
-
-  //! şimdi sadece searchText değiştiginde bu fonksiyon render edilecek
-  const filteredUsers = useMemo(
-    () => users.filter(user => {
-      console.log("filter function runnig...")
-      return user.name.toLowerCase().includes(searchText.toLowerCase());
-    }
-    ), [searchText]
-  )
+  const [products, setProducts] = useState([]);
+  const [shoppingCart, setShoppingCart] = useState([])
 
 
+  //! sayfa her render edildiğinde fonksiyonun memorydeki yer değiştiği icin, tekrar yazılır.
+  //* aslında bir fonksiyonu useCallback ile sarmalarsak,  sadece 1 kere oluşturulur. dependency arrayine verdiğimiz değişken ile tekrardan yazılmasını sağlayabiliriz.
+  const fetchProducts = () => {
+    axios.get("https://6238bcf800ed1dbc5ab6d6a7.mockapi.io/products")
+      .then(response => setProducts(response.data))
+      .catch(err => console.log(err.message))
+    console.log("fetch products")
+  };
+
+  
+  console.log("app js render")
+  
+  //* useEffectin return ifadesinde ekrandan cıkarken ne yapılmasını istersek onu yazmalıyız.
   useEffect(() => {
-    fetchUsers();
+    console.log("fetch data uae effect");
+    fetchProducts();
+    return () => {
+      console.log("useEffect fetch bitti")
+    }
   }, [])
 
   return (
-    <div className="App">
-      <input onChange={handleSubmitSearchText} />
-      {filteredUsers ? filteredUsers.map(user => <p key={user.id}>{user.name}</p>) : <p>Loadingg</p>}
+    <div className='App'>
+      <h1>Products</h1>
+      <Row>
+        {
+          products.length !== 0
+            ? products.map(
+              product =>
+              <Col xs={12} lg={4} key={product.id}>
+                <Cart
+                  product={product}
+                  setShoppingCart={setShoppingCart}
+                  shoppingCart={shoppingCart}
+                />
+                </Col>
+            )
+            : <h1>Loading...</h1>
+        }
+      </Row>
+      <ShoppingCart
+        shoppingCart={shoppingCart}
+        setShoppingCart={setShoppingCart}
+      />
     </div>
   );
-}
+};
 
 export default App;
